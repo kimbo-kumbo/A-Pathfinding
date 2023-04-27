@@ -481,4 +481,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _prefabTile: {fileID: 4020328078547823482, guid: e2133f17b725bba45aa7ff247dd5d366, type: 3}
-  tileExamples: []
