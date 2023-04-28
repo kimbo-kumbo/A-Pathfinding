@@ -12,22 +12,10 @@ public class APathFinding : MonoBehaviour
     private int _resolutionField;        
     private List<TileExample> _tileExamples = new List<TileExample>();
 
-    public int _testID;
     private void Start()
     {
         GenerateField();
-        FindNearTile();
-
-        foreach(TileExample example in _tileExamples)
-        {
-            if(example._iD == _testID)
-            {
-                foreach(int example2 in example._idTileNear)
-                {
-                    Debug.Log(example2);
-                }
-            }
-        }
+        FindNearTile();       
     }
 
     private void GenerateField() //генерируем поле
@@ -50,12 +38,12 @@ public class APathFinding : MonoBehaviour
                 pref._idText.text = pref._iD.ToString();
                 _currentId++;
             }
-            startPoint += new Vector3(-_resolutionField, 0, directionGeneration); //задаём новые координаты для стартовой точки генераци
+            startPoint += new Vector3(-_resolutionField, 0, directionGeneration);
         }
 
     }
 
-    private void FindNearTile()
+    private void FindNearTile() //находим соседние клетки для каждой клетки
     {
         foreach(TileExample curentTile in _tileExamples)
         {
