@@ -6,6 +6,10 @@ using System.Collections;
 
 public class APathFinding : MonoBehaviour
 {
+    /// <summary>
+    /// путь от стартовой точки до конечной
+    /// </summary>
+    public List<Tile> _pathPoint = new List<Tile>();
     public Tile _startPoint;
     public Tile _currentPoint;
     public Tile _endPoint;
@@ -34,7 +38,8 @@ public class APathFinding : MonoBehaviour
         {
             if(tile.mesh.material.color == Color.red)
             {
-                _closed_ListTile.Add(tile);                
+                _closed_ListTile.Add(tile);
+                tile.mesh.material.color = Color.grey;
             }            
         }
 
@@ -82,8 +87,18 @@ public class APathFinding : MonoBehaviour
         var sortedList = _open_ListTile.OrderBy(p => p.Value); //сортуирую коллекцию соседних открытых плиток по возрастанию
         Debug.Log(sortedList.First().Key);
         _open_ListTile.Remove(_currentPoint);
-        _closed_ListTile.Add(_currentPoint); //добавляем пройденную(обработанную) плитку в закрытый список        
+        _closed_ListTile.Add(_currentPoint); //добавляем пройденную(обработанную) плитку в закрытый список
+        _currentPoint.mesh.material.color = Color.grey;
         _currentPoint = sortedList.First().Key; //выбираем новую плитку на которую встаем и повторяем предидущие шаги
+        if(_currentPoint == _endPoint)
+        {
+            _pathPoint.Clear();
+            _endPoint.RestorePath(_pathPoint);
+            foreach(Tile tile in _pathPoint)
+            {
+                Debug.Log(tile._iD);    
+            }
+        }
     }
 
     private float CalculationWeightTile(Tile curentTile,Tile nearTile , Tile endTile)

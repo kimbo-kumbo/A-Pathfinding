@@ -17,10 +17,19 @@ public class Tile : MonoBehaviour
     /// <summary>
     /// список соседних точек
     /// </summary>
-    public List<Tile> _tileNear;    
+    public List<Tile> _tileNear;
     /// <summary>
     /// Tочка из которой пришли в текущую
     /// </summary>
-    public Tile _previosPoint;   
+    public Tile _previosPoint;
 
+    public void RestorePath(List<Tile> path)
+    {        
+        path.Add(this);
+        if(_previosPoint != null)
+        {
+            _previosPoint.RestorePath(path);
+            _previosPoint.mesh.material.color = Color.green;
+        }        
+    }
 }
