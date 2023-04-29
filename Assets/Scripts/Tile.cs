@@ -6,7 +6,10 @@ using UnityEngine.UI;
 public class Tile : MonoBehaviour
 {
     public MeshRenderer mesh;
-    public Text _idText;
+    public Text _id;
+    public Text _distanceToNear;
+    public Text _distanceToEndTile;
+    public Text _weightTile;
     /// <summary>
     /// ID точки
     /// </summary>

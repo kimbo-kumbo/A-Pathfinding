@@ -32,7 +32,7 @@ public class CreateTileField : MonoBehaviour
                 pref.transform.position = startPoint;
                 startPoint = pref.transform.position + new Vector3(directionGeneration, 0, 0);
                 pref._iD = _currentId;
-                pref._idText.text = pref._iD.ToString();
+                pref._id.text = pref._iD.ToString();
                 _currentId++;
             }
             startPoint += new Vector3(-_resolutionField, 0, directionGeneration);
