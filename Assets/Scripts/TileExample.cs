@@ -12,11 +12,15 @@ public class TileExample : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        mesh.material.color = Color.green;
+        if(other.gameObject.GetComponent<Position_Marker>() != null && mesh.material.color != Color.red)
+           mesh.material.color = Color.yellow;
+        if(other.gameObject.GetComponent<Obstacle_Marker>() != null)
+            mesh.material.color = Color.red;
     }
 
     private void OnTriggerExit(Collider other)
     {
-        mesh.material.color = Color.white;
+        if (other.gameObject.GetComponent<Position_Marker>() && mesh.material.color != Color.red || other.gameObject.GetComponent<Obstacle_Marker>())                
+            mesh.material.color = Color.white;
     }
 }
