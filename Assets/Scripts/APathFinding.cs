@@ -1,65 +1,54 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine;
-using UnityEngine.UI;
-using static UnityEngine.GraphicsBuffer;
 
 public class APathFinding : MonoBehaviour
 {
-    [SerializeField] private TileExample _prefabTile;
-    private int _currentId = 1;
-    private int _resolutionField;        
-    private List<TileExample> _tileExamples = new List<TileExample>();
+    public Tile _startPoint;
+    public Tile _currentPoint;
+    public Tile _endPoint;
+    public CreateTileField _createTileField;
 
-    private void Start()
+    public Dictionary<Tile, float> _open_ListTile = new Dictionary<Tile, float>(); //открытый список клеток
+    public List<Tile> _closed_ListTile = new List<Tile>(); //закрытый список клеток    
+
+
+    private void Update()
     {
-        GenerateField();
-        FindNearTile();       
+        if(Input.GetKeyDown(KeyCode.Space))
+        PathFinding();
     }
 
-    private void GenerateField() //генерируем поле
+    public void PathFinding()
     {
-        _resolutionField = (int)gameObject.transform.localScale.x * 10;
-        MeshFilter meshFilter = gameObject.GetComponent<MeshFilter>();
-        float directionGeneration = _prefabTile.transform.localScale.x;
-        float startPointScale = gameObject.transform.localScale.x;
-        Vector3 startPoint = meshFilter.mesh.vertices[meshFilter.mesh.vertices.Length - 1] * startPointScale + new Vector3((directionGeneration / 2), 0, (directionGeneration / 2));
-
-        for (int i = 0; i < _resolutionField; i++)
+        //очищаем оба списка
+        _open_ListTile.Clear();
+        _closed_ListTile.Clear();        
+        //назначаем текущую клетку стартовой
+        _currentPoint = _startPoint;
+        //добавляем в закрытый список стартовую точку 
+        _closed_ListTile.Add(_startPoint);
+        //добавляем в закрытый список все клетки помеченные препятствиями
+        foreach(Tile tile in _createTileField._tileExamples)
         {
-            for (int j = 0; j < _resolutionField; j++)
+            if(tile.mesh.material.color == Color.red)
             {
-                TileExample pref = Instantiate(_prefabTile, transform);
-                _tileExamples.Add(pref);
-                pref.transform.position = startPoint;
-                startPoint = pref.transform.position + new Vector3(directionGeneration, 0, 0);
-                pref._iD = _currentId;
-                pref._idText.text = pref._iD.ToString();
-                _currentId++;
+                _closed_ListTile.Add(tile);
             }
-            startPoint += new Vector3(-_resolutionField, 0, directionGeneration);
-        }
-
+        }        
+        
+        //добавляем соседние точки в открытые список        
+        foreach (Tile tile in _startPoint._tileNear)
+        {
+            if (tile.mesh.material.color == Color.red) continue;
+            _open_ListTile.Add(tile, CalculationWeightTile(tile.transform, _endPoint.transform));
+            tile._previosPoint = _currentPoint;
+        }       
     }
 
-    private void FindNearTile() //находим соседние клетки для каждой клетки
+    private float CalculationWeightTile(Transform nearTile , Transform endTile)
     {
-        foreach(TileExample curentTile in _tileExamples)
-        {
-            foreach(TileExample tile in _tileExamples)
-            {
-                if (curentTile.transform == tile.transform) continue;
-                float absX = Mathf.Abs(curentTile.transform.position.x - tile.transform.position.x);
-                float absZ = Mathf.Abs(curentTile.transform.position.z - tile.transform.position.z);
-                float absTargetValue = _prefabTile.transform.localScale.x;
-
-                if ((absX == absTargetValue && absZ == absTargetValue) || (absX == absTargetValue && absZ == 0) || (absX == 0 && absZ == absTargetValue)) 
-                {
-                    curentTile._idTileNear.Add(tile._iD);
-                }
-            }
-        }
-
+       float distanceToNearTile =  Mathf.Abs(transform.position.x - nearTile.position.x) + Mathf.Abs(transform.position.z - nearTile.position.z);
+       float distanceToEndTile =  Mathf.Abs(endTile.position.x - nearTile.position.x) + Mathf.Abs(endTile.position.z - nearTile.position.z);
+       return distanceToNearTile + distanceToEndTile;
     }
 }
