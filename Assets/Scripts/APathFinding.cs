@@ -36,20 +36,25 @@ public class APathFinding : MonoBehaviour
         //добавляем в закрытый список все клетки помеченные препятствиями
         foreach(Tile tile in _createTileField._tileExamples)
         {
-            if(tile.mesh.material.color == Color.red)
+            if (tile.mesh.material.color == Color.red)
             {
                 _closed_ListTile.Add(tile);
-                tile.mesh.material.color = Color.grey;
-            }            
+                continue;
+            }
+            if (tile.mesh.material.color == Color.yellow) continue;           
+
+                tile.mesh.material.color = Color.white;
+            
+
         }
 
-        foreach(Tile tile in _currentPoint._tileNear)
+       /* foreach(Tile tile in _currentPoint._tileNear)
         {
             if (tile.mesh.material.color == Color.red)
             {
-                _open_ListTile.Add(tile, 0f);
+                _open_ListTile.Add(tile, CalculationWeightTile(_currentPoint, tile, _endPoint));
             }
-        }
+        }*/
 
         //добавляем в закрытый список стартовую точку         
         _closed_ListTile.Add(_currentPoint);
@@ -66,39 +71,78 @@ public class APathFinding : MonoBehaviour
     {
         while (_currentPoint != _endPoint)
         {
-            yield return new WaitForSeconds(0.5f);
-            FindPath();
+           
+            foreach (Tile tile in _currentPoint._tileNear)
+            {
+                //if (tile.mesh.material.color == Color.red) continue; //изменить проверку по ID////////////////////////////////////
+                if (_closed_ListTile.Contains(tile)) continue;
+                if (_open_ListTile.ContainsKey(tile))
+                {
+                    float newF = CalculationWeightTile(_currentPoint, tile, _endPoint);
+                    float oldF = _open_ListTile[tile];
+                    if (newF < oldF) tile._previosPoint = _currentPoint;
+                    yield return new WaitForSeconds(0.3f);
+                    continue;
+                }
+                _open_ListTile.Add(tile, CalculationWeightTile(_currentPoint, tile, _endPoint));
+                tile._previosPoint = _currentPoint; //запоминаем для каждой плитки другую плитку из которой пришли
+                yield return new WaitForSeconds(0.3f);
+            }
+
+
+            //Debug.Log(sortedList.First().Key);
+            _open_ListTile.Remove(_currentPoint);
+            _closed_ListTile.Add(_currentPoint); //добавляем пройденную(обработанную) плитку в закрытый список
+            _currentPoint.mesh.material.color = Color.grey;
+            var sortedList = _open_ListTile.OrderBy(p => p.Value); //сортуирую коллекцию соседних открытых плиток по возрастанию
+            _currentPoint = sortedList.First().Key; //выбираем новую плитку на которую встаем и повторяем предидущие шаги
+            if (_currentPoint == _endPoint)
+            {
+                _pathPoint.Clear();
+                _endPoint.RestorePath(_pathPoint);
+                foreach (Tile tile in _pathPoint)
+                {
+                    Debug.Log(tile._iD);
+                }
+            }
+            //FindPath();
         }
     }
 
     public void FindPath()
     {
         //добавляем соседние точки в открытые список
-        foreach (Tile tile in _currentPoint._tileNear)
-        {
-            //if (tile.mesh.material.color == Color.red) continue; //изменить проверку по ID////////////////////////////////////
-            if (_closed_ListTile.Contains(tile)) continue;
-            if (_open_ListTile.ContainsKey(tile)) continue;
+        //foreach (Tile tile in _currentPoint._tileNear)
+        //{
+        //    //if (tile.mesh.material.color == Color.red) continue; //изменить проверку по ID////////////////////////////////////
+        //    if (_closed_ListTile.Contains(tile)) continue;
+        //    if (_open_ListTile.ContainsKey(tile))
+        //    {
+        //        float newF = CalculationWeightTile(_currentPoint, tile, _endPoint);
+        //        float oldF = _open_ListTile[tile];
+        //        if(newF < oldF) tile._previosPoint = _currentPoint;
+        //        continue;
+        //    }
+        //    _open_ListTile.Add(tile, CalculationWeightTile(_currentPoint, tile, _endPoint));
+        //    tile._previosPoint = _currentPoint; //запоминаем для каждой плитки другую плитку из которой пришли
+        //}
 
-            _open_ListTile.Add(tile, CalculationWeightTile(_currentPoint, tile, _endPoint));
-            tile._previosPoint = _currentPoint; //запоминаем для каждой плитки другую плитку из которой пришли
-        }
-
-        var sortedList = _open_ListTile.OrderBy(p => p.Value); //сортуирую коллекцию соседних открытых плиток по возрастанию
-        Debug.Log(sortedList.First().Key);
-        _open_ListTile.Remove(_currentPoint);
-        _closed_ListTile.Add(_currentPoint); //добавляем пройденную(обработанную) плитку в закрытый список
-        _currentPoint.mesh.material.color = Color.grey;
-        _currentPoint = sortedList.First().Key; //выбираем новую плитку на которую встаем и повторяем предидущие шаги
-        if(_currentPoint == _endPoint)
-        {
-            _pathPoint.Clear();
-            _endPoint.RestorePath(_pathPoint);
-            foreach(Tile tile in _pathPoint)
-            {
-                Debug.Log(tile._iD);    
-            }
-        }
+        
+        ////Debug.Log(sortedList.First().Key);
+        //_open_ListTile.Remove(_currentPoint);
+        //_closed_ListTile.Add(_currentPoint); //добавляем пройденную(обработанную) плитку в закрытый список
+        //_currentPoint.mesh.material.color = Color.grey;
+        //var sortedList = _open_ListTile.OrderBy(p => p.Value); //сортуирую коллекцию соседних открытых плиток по возрастанию
+        //_currentPoint = sortedList.First().Key; //выбираем новую плитку на которую встаем и повторяем предидущие шаги
+        //if(_currentPoint == _endPoint)
+        //{
+        //    _pathPoint.Clear();
+        //    _endPoint.RestorePath(_pathPoint);
+        //    foreach(Tile tile in _pathPoint)
+        //    {
+        //        Debug.Log(tile._iD);    
+        //    }
+        //}
     }
 
     private float CalculationWeightTile(Tile curentTile,Tile nearTile , Tile endTile)
